@@ -25,6 +25,7 @@ class ProductDB(Base):
     selling_price = Column(Float, nullable=False)
     quantity = Column(Integer, nullable=False)
     low_stock_threshold = Column(Integer, nullable=False)
+    category = Column(String, default="General")
 
     sales = relationship("SaleDB", back_populates="product", cascade="all, delete-orphan")
 
@@ -47,6 +48,7 @@ class Product(BaseModel):
     sellingPrice: float = Field(..., gt=0)
     quantity: int = Field(..., ge=0)
     lowStockThreshold: int = Field(..., ge=0)
+    category: str = "General"
 
     class Config:
         orm_mode = True
@@ -85,6 +87,7 @@ def create_or_update_product(db: Session, product: Product) -> ProductDB:
         existing.selling_price = product.sellingPrice
         existing.quantity = product.quantity
         existing.low_stock_threshold = product.lowStockThreshold
+        existing.category = product.category
         db.add(existing)
         db.commit()
         db.refresh(existing)
@@ -97,6 +100,7 @@ def create_or_update_product(db: Session, product: Product) -> ProductDB:
         selling_price=product.sellingPrice,
         quantity=product.quantity,
         low_stock_threshold=product.lowStockThreshold,
+        category=product.category,
     )
     db.add(db_product)
     try:
