@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import Column, Float, ForeignKey, Integer, String, create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
@@ -42,25 +42,23 @@ class SaleDB(Base):
 
 
 class Product(BaseModel):
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, ser_by_alias=False)
+    
     id: str
     name: str
-    buyingPrice: float = Field(..., gt=0)
-    sellingPrice: float = Field(..., gt=0)
+    buyingPrice: float = Field(..., gt=0, alias='buying_price')
+    sellingPrice: float = Field(..., gt=0, alias='selling_price')
     quantity: int = Field(..., ge=0)
-    lowStockThreshold: int = Field(..., ge=0)
+    lowStockThreshold: int = Field(..., ge=0, alias='low_stock_threshold')
     category: str = "General"
-
-    class Config:
-        orm_mode = True
 
 
 class Sale(BaseModel):
-    productId: str
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, ser_by_alias=False)
+    
+    productId: str = Field(alias='product_id')
     date: int
     quantity: int = Field(..., ge=1)
-
-    class Config:
-        orm_mode = True
 
 
 def create_database() -> None:
