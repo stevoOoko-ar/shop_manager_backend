@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import List, Optional
 
@@ -8,6 +9,10 @@ from sqlalchemy import Column, Float, ForeignKey, Integer, String, create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, relationship, sessionmaker
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 DATABASE_URL = "sqlite:///./shop_manager.db"
 
@@ -42,7 +47,12 @@ class SaleDB(Base):
 
 
 class Product(BaseModel):
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True, ser_by_alias=False)
+    model_config = ConfigDict(
+        from_attributes=True, 
+        populate_by_name=True, 
+        ser_by_alias=False,
+        extra='ignore'  # Ignore extra fields like isDeleted from Flutter
+    )
     
     id: str
     name: str
@@ -165,7 +175,14 @@ def list_products(db: Session = Depends(get_db)):
 
 @app.post("/products", response_model=Product)
 def add_product(product: Product, db: Session = Depends(get_db)):
-    return create_or_update_product(db, product)
+    logger.info(f"📦 Received POST /products request: {product.model_dump()}")
+    try:
+        result = create_or_update_product(db, product)
+        logger.info(f"✅ Product saved successfully: {product.id}")
+        return result
+    except Exception as e:
+        logger.error(f"❌ Error saving product: {type(e).__name__}: {str(e)}")
+        raise
 
 
 @app.put("/products/{product_id}", response_model=Product)
