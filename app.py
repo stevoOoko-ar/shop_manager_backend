@@ -221,3 +221,10 @@ def daily_report(days: int = Query(7, ge=1), db: Session = Depends(get_db)):
         result[key]["sales"] += sale.quantity * sale.product.selling_price
         result[key]["profit"] += sale.quantity * (sale.product.selling_price - sale.product.buying_price)
     return {"dailyReports": sorted(result.values(), key=lambda x: x["date"])}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    logger.info("🚀 Starting Shop Manager API on http://0.0.0.0:8000")
+    logger.info("📡 Database: sqlite:///./shop_manager.db")
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
