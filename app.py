@@ -50,7 +50,7 @@ class Product(BaseModel):
     model_config = ConfigDict(
         from_attributes=True, 
         populate_by_name=True, 
-        ser_by_alias=False,
+        ser_by_alias=True,  # Use snake_case in responses to match DB attributes
         extra='ignore'  # Ignore extra fields like isDeleted from Flutter
     )
     
@@ -64,7 +64,7 @@ class Product(BaseModel):
 
 
 class Sale(BaseModel):
-    model_config = ConfigDict(from_attributes=True, populate_by_name=True, ser_by_alias=False)
+    model_config = ConfigDict(from_attributes=True, populate_by_name=True, ser_by_alias=True)  # Match DB attributes
     
     productId: str = Field(alias='product_id')
     date: int
